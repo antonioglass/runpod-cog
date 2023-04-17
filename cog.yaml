@@ -1,0 +1,20 @@
+build:
+  gpu: true
+  cuda: "11.6"
+  python_version: "3.10"
+  python_packages:
+    - "diffusers==0.14.0"
+    - "torch==1.13.1"
+    - "ftfy==6.1.1"
+    - "scipy==1.9.3"
+    - "transformers==4.27.1"
+    - "accelerate==0.17.1"
+    - "xformers==0.0.16"
+    - "runpod==0.9.0"
+
+  run:
+    - pip install triton
+    - pip install compel
+  #   - pip install https://github.com/runpod/runpod-python/archive/main.zip
+
+predict: "predict.py:Predictor"
