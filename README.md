@@ -12,7 +12,9 @@ sudo chmod +x /usr/local/bin/cog
 ```
 ## Download model
 ```bash
-cog run script/download-weights
+sudo chmod 777 scripts/download-weights
+
+sudo cog run script/download-weights
 ```
 
 ## Cog Model Edits
