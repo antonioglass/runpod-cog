@@ -36,6 +36,20 @@ In `format_convert.py` update the `model_id`, `safetensor_path` variable with th
 ```bash
 python format_convert.py
 ```
+## Run Model
+```bash
+sudo cog predict -i prompt="" \
+-i negative_prompt="" \
+-i width= \
+-i height= \
+-i num_outputs= \
+-i num_inference_steps= \
+-i guidance_scale= \
+-i scheduler= \
+-i lora="" \
+-i lora_scale= \
+-i seed=
+```
 
 ## Cog Model Edits
 
