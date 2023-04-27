@@ -19,6 +19,11 @@ sudo cog run script/download-weights
 sudo cog predict -i prompt="monkey scuba diving" -i negative_prompt=""
 ```
 
+## Download LoRa
+```bash
+wget https://civitai.com/api/download/models/12345 --content-disposition
+```
+
 ## Cog Model Edits
 
 Once Cog is installed and the base Cog model is cloned, the following edits need to be made within the cloned directory.
