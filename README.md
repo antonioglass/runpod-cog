@@ -8,6 +8,10 @@ sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/lat
 
 sudo chmod +x /usr/local/bin/cog
 ```
+## Download model
+```bash
+cog run script/download-weights
+```
 
 ## Cog Model Edits
 
