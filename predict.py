@@ -141,7 +141,7 @@ class Predictor(BasePredictor):
             description="instantly download lora models and use them via runpod",
             default=None
         ),
-        lora_scale : int = Input(
+        lora_scale: float = Input(
             description="what percentage of the lora model do you want applied?",
             default=1
         )
