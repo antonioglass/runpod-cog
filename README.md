@@ -10,7 +10,8 @@ sudo curl -o /usr/local/bin/cog -L https://github.com/replicate/cog/releases/lat
 
 sudo chmod +x /usr/local/bin/cog
 ```
-## Download model
+## Download Model
+
 ```bash
 sudo chmod 777 scripts/download-weights
 
@@ -20,8 +21,14 @@ sudo cog predict -i prompt="monkey scuba diving" -i negative_prompt=""
 ```
 
 ## Download LoRa
+
 ```bash
 wget https://civitai.com/api/download/models/12345 --content-disposition
+```
+## Convert LoRa
+
+```bash
+pip install torch==1.13.1 safetensors diffusers==0.14.0
 ```
 
 ## Cog Model Edits
