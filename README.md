@@ -28,7 +28,7 @@ wget https://civitai.com/api/download/models/12345 --content-disposition
 ## Convert LoRa
 
 ```bash
-pip install torch==1.13.1 safetensors diffusers==0.14.0 transformers==4.27.1
+pip install torch==1.13.1 safetensors diffusers==0.14.0 transformers==4.27.1 accelerate==0.17.1
 ```
 
 ## Cog Model Edits
