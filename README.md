@@ -31,7 +31,7 @@ wget https://civitai.com/api/download/models/12345 --content-disposition
 pip install torch==1.13.1 safetensors diffusers==0.14.0 transformers==4.27.1 accelerate==0.17.1
 ```
 
-Update the safetensor_path variable with the path to the safetensor file you downloaded, and the bin_path variable with the desired output path for the bin file.
+In `format_convert.py` update the `safetensor_path` variable with the path to the safetensor file you downloaded, and the `bin_path` variable with the desired output path for the bin file.
 
 ```bash
 python format_convert.py
