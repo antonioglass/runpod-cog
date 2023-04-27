@@ -1,5 +1,7 @@
 ## Clone
+```bash
 git clone https://github.com/antonioglass/runpod-cog.git
+```
 
 ## Install Cog
 
