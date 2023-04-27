@@ -172,6 +172,7 @@ if __name__ == "__main__":
     # convert
     # download example from https://huggingface.co/sayakpaul/sd-model-finetuned-lora-t4/tree/main
     # wget https://huggingface.co/sayakpaul/sd-model-finetuned-lora-t4/resolve/main/pytorch_lora_weights.bin
-    bin_path = "pytorch_lora_weights.bin"
-    safetensor_path = "pytorch_lora_weights.safetensors"
-    bin_to_safetensors(bin_path, safetensor_path)
+    # Comment out the following lines if you don't want to convert .bin to .safetensors
+    # bin_path = "pytorch_lora_weights.bin"
+    # safetensor_path = "pytorch_lora_weights.safetensors"
+    # bin_to_safetensors(bin_path, safetensor_path)
