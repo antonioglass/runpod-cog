@@ -20,11 +20,6 @@ sudo cog run script/download-weights
 sudo cog predict -i prompt="monkey scuba diving" -i negative_prompt=""
 ```
 
-## Download LoRa
-
-```bash
-wget https://civitai.com/api/download/models/12345 --content-disposition
-```
 ## Convert Safetensors to Diffusers
 ```bash
 pip install torch==1.13.1 safetensors diffusers==0.14.0 transformers==4.27.1 accelerate==0.17.1 omegaconf
@@ -35,6 +30,12 @@ python convert_original_stable_diffusion_to_diffusers.py \
 --checkpoint_path ./path-to-model.safetensors \
 --dump_path out-put-path \
 --from_safetensors
+```
+
+## Download LoRa
+
+```bash
+wget https://civitai.com/api/download/models/12345 --content-disposition
 ```
 
 ## Convert LoRa
