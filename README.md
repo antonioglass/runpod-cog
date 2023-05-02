@@ -122,3 +122,7 @@ sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 
 sudo
 ```
+
+## Other
+### Clip Skip 2
+Set `num_hidden_layers` to 11 in `text_encoder/config.json`.
