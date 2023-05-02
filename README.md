@@ -75,14 +75,18 @@ Once Cog is installed and the base Cog model is cloned, the following edits need
 
 Finally, test the worker locally with `cog run ./worker`
 
-## Building Container
+## Building Container and Pushing it to Docker Hub
 
 Once the worker is tested locally, the container can be built.
 
 ```BASH
-cog build -t ai-api-{model-name}
-docker tag ai-api-{model-name} runpod/ai-api-{model-name}:latest
-docker push runpod/ai-api-{model-name}:latest
+sudo cog build -t ai-api-{model-name}
+sudo docker tag ai-api-{model-name} runpod/ai-api-{model-name}:latest
+```
+
+```BASH
+sudo docker login
+sudo docker push runpod/ai-api-{model-name}:latest
 ```
 
 *Replacing `ai-api-{model-name}` and `runpod` with your own model name and dockerhub username.*
