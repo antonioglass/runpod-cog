@@ -32,6 +32,17 @@ python convert_original_stable_diffusion_to_diffusers.py \
 --from_safetensors
 ```
 
+## Convert VAE pt to Diffusers
+```bash
+pip install numexpr=2.7.3 pytorch_lightning
+```
+
+```bash
+python convert_vae_pt_to_diffusers.py \
+--vae_pt_path path-to-vae \
+--dump_path vae
+```
+
 ## Download LoRa
 
 ```bash
