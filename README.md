@@ -75,6 +75,29 @@ sudo cog predict -i prompt="" \
 -i seed=
 ```
 
+## Push model to Huggingface
+1. Create repository on Huggingface
+2. Clone it
+```bash
+git clone https://huggingface.co/<your-username>/<your-model-name>
+cd <your-model-name>
+```
+3. Mode model into the directory
+4. Download git-lfs
+```bash
+sudo apt update
+sudo apt install git-lfs
+```bash
+5. Initialize git-lfs `git lfs install`
+6. `huggingface-cli lfs-enable-largefiles .`
+7. Push
+```bash
+# Create any files you like! Then...
+git add .
+git commit -m "First model version"  # You can choose any descriptive message
+git push
+```
+
 ## Cog Model Edits
 
 Once Cog is installed and the base Cog model is cloned, the following edits need to be made within the cloned directory.
