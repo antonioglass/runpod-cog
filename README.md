@@ -87,7 +87,7 @@ cd <your-model-name>
 ```bash
 sudo apt update
 sudo apt install git-lfs
-```bash
+```
 5. Initialize git-lfs `git lfs install`
 6. `huggingface-cli lfs-enable-largefiles .`
 7. Push
