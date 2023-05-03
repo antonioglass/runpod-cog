@@ -34,7 +34,7 @@ python convert_original_stable_diffusion_to_diffusers.py \
 
 ## Convert VAE pt to Diffusers
 ```bash
-pip install numexpr=2.7.3 pytorch_lightning
+pip install numexpr==2.7.3 pytorch_lightning
 ```
 
 ```bash
