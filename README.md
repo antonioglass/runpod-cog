@@ -82,7 +82,7 @@ sudo cog predict -i prompt="" \
 git clone https://huggingface.co/<your-username>/<your-model-name>
 cd <your-model-name>
 ```
-3. Mode model into the directory
+3. Move model into the directory
 4. Download git-lfs
 ```bash
 sudo apt update
