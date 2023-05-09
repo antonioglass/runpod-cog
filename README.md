@@ -15,7 +15,7 @@ sudo chmod +x /usr/local/bin/cog
 ```bash
 sudo chmod 777 scripts/download-weights
 
-sudo cog run script/download-weights
+sudo cog run scripts/download-weights
 
 sudo cog predict -i prompt="monkey scuba diving" -i negative_prompt=""
 ```
