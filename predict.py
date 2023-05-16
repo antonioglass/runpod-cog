@@ -5,6 +5,8 @@ from typing import List
 
 import torch
 from diffusers import (
+    StableDiffusionControlNetPipeline,
+    ControlNetModel,
     StableDiffusionPipeline,
     StableDiffusionImg2ImgPipeline,
     # StableDiffusionInpaintPipeline,
@@ -35,6 +37,7 @@ from PIL import Image
 from cog import BasePredictor, Input, Path
 from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
 from compel import Compel
+from diffusers.utils import load_image
 
 MODEL_CACHE = "diffusers-cache"
 
@@ -47,6 +50,11 @@ class Predictor(BasePredictor):
         Load the model into memory to make running multiple predictions efficient
         '''
         print("Loading pipeline...")
+
+        self.controlnet = ControlNetModel.from_pretrained(
+             "./sd-controlnet-openpose",
+             # torch_dtype=torch.float16
+        )
 
         self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
             "antonioglass/dlbrt",
@@ -74,11 +82,19 @@ class Predictor(BasePredictor):
             # safety_checker=self.txt2img_pipe.safety_checker,
             feature_extractor=self.txt2img_pipe.feature_extractor,
         ).to("cuda")
+        self.txt2img_controlnet_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+            "antonioglass/dlbrt",
+            safety_checker=None,
+            cache_dir=MODEL_CACHE,
+            local_files_only=True,
+            controlnet=self.controlnet
+        ).to("cuda")
         
         # because lora is loaded for the entire model
         self.lora_loaded = False
 
         self.txt2img_pipe.enable_xformers_memory_efficient_attention()
+        self.txt2img_controlnet_pipe.enable_xformers_memory_efficient_attention()
         self.compel = Compel(tokenizer=self.txt2img_pipe.tokenizer, text_encoder=self.txt2img_pipe.text_encoder)
         self.img2img_pipe.enable_xformers_memory_efficient_attention()
         self.inpaint_pipe.enable_xformers_memory_efficient_attention()
@@ -144,7 +160,11 @@ class Predictor(BasePredictor):
         lora_scale: float = Input(
             description="what percentage of the lora model do you want applied?",
             default=1
-        )
+        ),
+        pose_image: str = Input(
+            description="Path to processed image for ControlNet.",
+            default=None,
+        ),
     ) -> List[Path]:
         '''
         Run a single prediction on the model
@@ -175,6 +195,11 @@ class Predictor(BasePredictor):
             extra_kwargs = {
                 "init_image": Image.open(init_image).convert("RGB"),
                 "strength": prompt_strength,
+            }
+        elif pose_image:
+            pipe = self.txt2img_controlnet_pipe
+            extra_kwargs = {
+                "image": load_image(pose_image),
             }
         else:
             pipe = self.txt2img_pipe
