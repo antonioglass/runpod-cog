@@ -94,6 +94,11 @@ INPUT_SCHEMA = {
         'required' : False,
         'default' : 1,
         'constraints': lambda lora_scale: 0 <= lora_scale <= 1
+    },
+    'pose_image' : {
+        'type' : str,
+        'required' : False,
+        'default' : None
     }
 }
 
@@ -136,6 +141,7 @@ def run(job):
         scheduler=job_input.get('scheduler', "K-LMS"),
         lora=job_input.get("lora", None),
         lora_scale=job_input.get("lora_scale", 1),
+        image=job_input.get("pose_image", None),
         seed=job_input['seed']
     )
 
