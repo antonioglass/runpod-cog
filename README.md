@@ -70,6 +70,7 @@ sudo cog predict -i prompt="" \
 -i num_inference_steps= \
 -i guidance_scale= \
 -i scheduler= \
+-i pose_image="path-to-image" \
 -i lora="" \
 -i lora_scale= \
 -i seed=
