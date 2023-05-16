@@ -141,7 +141,7 @@ def run(job):
         scheduler=job_input.get('scheduler', "K-LMS"),
         lora=job_input.get("lora", None),
         lora_scale=job_input.get("lora_scale", 1),
-        image=job_input.get("pose_image", None),
+        pose_image=job_input.get("pose_image", None),
         seed=job_input['seed']
     )
 
