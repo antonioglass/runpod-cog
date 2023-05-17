@@ -51,10 +51,14 @@ class Predictor(BasePredictor):
         '''
         print("Loading pipeline...")
 
-        self.controlnet = ControlNetModel.from_pretrained(
-             "./sd-controlnet-openpose",
+        self.controlnet_pose = ControlNetModel.from_pretrained(
+             "./control_v11p_sd15_openpose",
              # torch_dtype=torch.float16
-        )
+        ).to("cuda")
+        self.controlnet_depth = ControlNetModel.from_pretrained(
+             "./control_v11f1p_sd15_depth",
+             # torch_dtype=torch.float16
+        ).to("cuda")
 
         self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
             "antonioglass/dlbrt",
@@ -62,42 +66,58 @@ class Predictor(BasePredictor):
             cache_dir=MODEL_CACHE,
             local_files_only=True,
         ).to("cuda")
-        self.img2img_pipe = StableDiffusionImg2ImgPipeline(
-            vae=self.txt2img_pipe.vae,
-            text_encoder=self.txt2img_pipe.text_encoder,
-            tokenizer=self.txt2img_pipe.tokenizer,
-            unet=self.txt2img_pipe.unet,
-            scheduler=self.txt2img_pipe.scheduler,
-            safety_checker=None,
+        # self.img2img_pipe = StableDiffusionImg2ImgPipeline(
+            # vae=self.txt2img_pipe.vae,
+            # text_encoder=self.txt2img_pipe.text_encoder,
+            # tokenizer=self.txt2img_pipe.tokenizer,
+            # unet=self.txt2img_pipe.unet,
+            # scheduler=self.txt2img_pipe.scheduler,
+            # safety_checker=None,
             # safety_checker=self.txt2img_pipe.safety_checker,
-            feature_extractor=self.txt2img_pipe.feature_extractor,
-        ).to("cuda")
-        self.inpaint_pipe = StableDiffusionInpaintPipelineLegacy(
-            vae=self.txt2img_pipe.vae,
-            text_encoder=self.txt2img_pipe.text_encoder,
-            tokenizer=self.txt2img_pipe.tokenizer,
-            unet=self.txt2img_pipe.unet,
-            scheduler=self.txt2img_pipe.scheduler,
-            safety_checker=None,
+            # feature_extractor=self.txt2img_pipe.feature_extractor,
+        # ).to("cuda")
+        # self.inpaint_pipe = StableDiffusionInpaintPipelineLegacy(
+            # vae=self.txt2img_pipe.vae,
+            # text_encoder=self.txt2img_pipe.text_encoder,
+            # tokenizer=self.txt2img_pipe.tokenizer,
+            # unet=self.txt2img_pipe.unet,
+            # scheduler=self.txt2img_pipe.scheduler,
+            # safety_checker=None,
             # safety_checker=self.txt2img_pipe.safety_checker,
-            feature_extractor=self.txt2img_pipe.feature_extractor,
-        ).to("cuda")
-        self.txt2img_controlnet_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+            # feature_extractor=self.txt2img_pipe.feature_extractor,
+        # ).to("cuda")
+        self.txt2img_controlnet_pose_and_depth_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             "antonioglass/dlbrt",
             safety_checker=None,
             cache_dir=MODEL_CACHE,
             local_files_only=True,
-            controlnet=self.controlnet
+            controlnet=[self.controlnet_pose, self.controlnet_depth],
         ).to("cuda")
+        # self.txt2img_controlnet_pose_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+            # "antonioglass/dlbrt",
+            # safety_checker=None,
+            # cache_dir=MODEL_CACHE,
+            # local_files_only=True,
+            # controlnet=self.controlnet_pose,
+        # ).to("cuda")
+        # self.txt2img_controlnet_depth_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+            # "antonioglass/dlbrt",
+            # safety_checker=None,
+            # cache_dir=MODEL_CACHE,
+            # local_files_only=True,
+            # controlnet=self.controlnet_depth,
+        # ).to("cuda")
         
         # because lora is loaded for the entire model
         self.lora_loaded = False
 
         self.txt2img_pipe.enable_xformers_memory_efficient_attention()
-        self.txt2img_controlnet_pipe.enable_xformers_memory_efficient_attention()
+        self.txt2img_controlnet_pose_and_depth_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_pose_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_depth_pipe.enable_xformers_memory_efficient_attention()
         self.compel = Compel(tokenizer=self.txt2img_pipe.tokenizer, text_encoder=self.txt2img_pipe.text_encoder)
-        self.img2img_pipe.enable_xformers_memory_efficient_attention()
-        self.inpaint_pipe.enable_xformers_memory_efficient_attention()
+        # self.img2img_pipe.enable_xformers_memory_efficient_attention()
+        # self.inpaint_pipe.enable_xformers_memory_efficient_attention()
 
     @torch.inference_mode()
     @torch.cuda.amp.autocast()
@@ -165,6 +185,10 @@ class Predictor(BasePredictor):
             description="Path to processed image for ControlNet.",
             default=None,
         ),
+        depth_image: str = Input(
+            description="Path to processed image for ControlNet.",
+            default=None,
+        ),
     ) -> List[Path]:
         '''
         Run a single prediction on the model
@@ -196,10 +220,20 @@ class Predictor(BasePredictor):
                 "init_image": Image.open(init_image).convert("RGB"),
                 "strength": prompt_strength,
             }
+        elif pose_image and depth_image:
+            pipe = self.txt2img_controlnet_pose_and_depth_pipe
+            extra_kwargs = {
+                "image": [load_image(pose_image), load_image(depth_image)],
+            }
         elif pose_image:
-            pipe = self.txt2img_controlnet_pipe
+            pipe = self.txt2img_controlnet_pose_pipe
             extra_kwargs = {
                 "image": load_image(pose_image),
+            }
+        elif depth_image:
+            pipe = self.txt2img_controlnet_depth_pipe
+            extra_kwargs = {
+                "image": load_image(depth_image),
             }
         else:
             pipe = self.txt2img_pipe
