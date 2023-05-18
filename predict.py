@@ -55,10 +55,10 @@ class Predictor(BasePredictor):
              "./control_v11p_sd15_openpose",
              # torch_dtype=torch.float16
         ).to("cuda")
-        self.controlnet_depth = ControlNetModel.from_pretrained(
-             "./control_v11f1p_sd15_depth",
+        # self.controlnet_depth = ControlNetModel.from_pretrained(
+             # "./control_v11f1p_sd15_depth",
              # torch_dtype=torch.float16
-        ).to("cuda")
+        # ).to("cuda")
 
         self.txt2img_pipe = StableDiffusionPipeline.from_pretrained(
             "antonioglass/dlbrt",
@@ -86,20 +86,20 @@ class Predictor(BasePredictor):
             # safety_checker=self.txt2img_pipe.safety_checker,
             # feature_extractor=self.txt2img_pipe.feature_extractor,
         # ).to("cuda")
-        self.txt2img_controlnet_pose_and_depth_pipe = StableDiffusionControlNetPipeline.from_pretrained(
-            "antonioglass/dlbrt",
-            safety_checker=None,
-            cache_dir=MODEL_CACHE,
-            local_files_only=True,
-            controlnet=[self.controlnet_pose, self.controlnet_depth],
-        ).to("cuda")
-        # self.txt2img_controlnet_pose_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+        # self.txt2img_controlnet_pose_and_depth_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             # "antonioglass/dlbrt",
             # safety_checker=None,
             # cache_dir=MODEL_CACHE,
             # local_files_only=True,
-            # controlnet=self.controlnet_pose,
-        # ).to("cuda")
+            # controlnet=[self.controlnet_pose, self.controlnet_depth],
+        ).to("cuda")
+        self.txt2img_controlnet_pose_pipe = StableDiffusionControlNetPipeline.from_pretrained(
+            "antonioglass/dlbrt",
+            safety_checker=None,
+            cache_dir=MODEL_CACHE,
+            local_files_only=True,
+            controlnet=self.controlnet_pose,
+        ).to("cuda")
         # self.txt2img_controlnet_depth_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             # "antonioglass/dlbrt",
             # safety_checker=None,
@@ -112,8 +112,8 @@ class Predictor(BasePredictor):
         self.lora_loaded = False
 
         self.txt2img_pipe.enable_xformers_memory_efficient_attention()
-        self.txt2img_controlnet_pose_and_depth_pipe.enable_xformers_memory_efficient_attention()
-        # self.txt2img_controlnet_pose_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_pose_and_depth_pipe.enable_xformers_memory_efficient_attention()
+        self.txt2img_controlnet_pose_pipe.enable_xformers_memory_efficient_attention()
         # self.txt2img_controlnet_depth_pipe.enable_xformers_memory_efficient_attention()
         self.compel = Compel(tokenizer=self.txt2img_pipe.tokenizer, text_encoder=self.txt2img_pipe.text_encoder)
         # self.img2img_pipe.enable_xformers_memory_efficient_attention()
@@ -185,10 +185,10 @@ class Predictor(BasePredictor):
             description="Path to processed image for ControlNet.",
             default=None,
         ),
-        depth_image: str = Input(
-            description="Path to processed image for ControlNet.",
-            default=None,
-        ),
+        # depth_image: str = Input(
+            # description="Path to processed image for ControlNet.",
+            # default=None,
+        # ),
     ) -> List[Path]:
         '''
         Run a single prediction on the model
@@ -220,21 +220,21 @@ class Predictor(BasePredictor):
                 "init_image": Image.open(init_image).convert("RGB"),
                 "strength": prompt_strength,
             }
-        elif pose_image and depth_image:
-            pipe = self.txt2img_controlnet_pose_and_depth_pipe
-            extra_kwargs = {
-                "image": [load_image(pose_image), load_image(depth_image)],
-            }
+        # elif pose_image and depth_image:
+            # pipe = self.txt2img_controlnet_pose_and_depth_pipe
+            # extra_kwargs = {
+                # "image": [load_image(pose_image), load_image(depth_image)],
+            # }
         elif pose_image:
             pipe = self.txt2img_controlnet_pose_pipe
             extra_kwargs = {
                 "image": load_image(pose_image),
             }
-        elif depth_image:
-            pipe = self.txt2img_controlnet_depth_pipe
-            extra_kwargs = {
-                "image": load_image(depth_image),
-            }
+        # elif depth_image:
+            # pipe = self.txt2img_controlnet_depth_pipe
+            # extra_kwargs = {
+                # "image": load_image(depth_image),
+            # }
         else:
             pipe = self.txt2img_pipe
             extra_kwargs = {
