@@ -92,7 +92,7 @@ class Predictor(BasePredictor):
             # cache_dir=MODEL_CACHE,
             # local_files_only=True,
             # controlnet=[self.controlnet_pose, self.controlnet_depth],
-        ).to("cuda")
+        # ).to("cuda")
         self.txt2img_controlnet_pose_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             "antonioglass/dlbrt",
             safety_checker=None,
