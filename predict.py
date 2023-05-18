@@ -258,8 +258,8 @@ class Predictor(BasePredictor):
             extra_kwargs['cross_attention_kwargs'] = {"scale": lora_scale}
         
         # because lora is retained between requests
-        if (lora is None) and self.lora_loaded:
-            extra_kwargs['cross_attention_kwargs'] = {"scale": 0}
+        # if (lora is None) and self.lora_loaded:
+            # extra_kwargs['cross_attention_kwargs'] = {"scale": 0}
 
         generator = torch.Generator("cuda").manual_seed(seed)
         output = pipe(
