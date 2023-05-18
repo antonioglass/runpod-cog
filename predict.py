@@ -108,9 +108,6 @@ class Predictor(BasePredictor):
             # controlnet=self.controlnet_depth,
         # ).to("cuda")
         
-        # because lora is loaded for the entire model
-        self.lora_loaded = False
-
         self.txt2img_pipe.enable_xformers_memory_efficient_attention()
         # self.txt2img_controlnet_pose_and_depth_pipe.enable_xformers_memory_efficient_attention()
         self.txt2img_controlnet_pose_pipe.enable_xformers_memory_efficient_attention()
@@ -179,7 +176,7 @@ class Predictor(BasePredictor):
         ),
         lora_scale: float = Input(
             description="what percentage of the lora model do you want applied?",
-            default=1
+            default=0
         ),
         pose_image: str = Input(
             description="Path to processed image for ControlNet.",
@@ -250,16 +247,8 @@ class Predictor(BasePredictor):
         negative_prompt_embeds = self.compel(negative_prompt)
         # not sure if it's needed. see more here: https://github.com/damian0815/compel#0110---add-support-for-prompts-longer-than-the-models-max-token-length
         [prompt_embeds, negative_prompt_embeds] = self.compel.pad_conditioning_tensors_to_same_length([prompt_embeds, negative_prompt_embeds])
-        
-        if not (lora is None):
-            print("loaded lora")
-            pipe.unet.load_attn_procs(lora)
-            self.lora_loaded = True
-            extra_kwargs['cross_attention_kwargs'] = {"scale": lora_scale}
-        
-        # because lora is retained between requests
-        # if (lora is None) and self.lora_loaded:
-            # extra_kwargs['cross_attention_kwargs'] = {"scale": 0}
+
+        pipe.unet.load_attn_procs(lora)
 
         generator = torch.Generator("cuda").manual_seed(seed)
         output = pipe(
@@ -270,6 +259,7 @@ class Predictor(BasePredictor):
             guidance_scale=guidance_scale,
             generator=generator,
             num_inference_steps=num_inference_steps,
+            cross_attention_kwargs={"scale": lora_scale},
             **extra_kwargs,
         )
 

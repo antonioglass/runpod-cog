@@ -92,7 +92,7 @@ INPUT_SCHEMA = {
     'lora_scale' : {
         'type' : float,
         'required' : False,
-        'default' : 1,
+        'default' : 0,
         'constraints': lambda lora_scale: 0 <= lora_scale <= 1
     },
     'pose_image' : {
@@ -140,7 +140,7 @@ def run(job):
         guidance_scale=job_input['guidance_scale'],
         scheduler=job_input.get('scheduler', "K-LMS"),
         lora=job_input.get("lora", None),
-        lora_scale=job_input.get("lora_scale", 1),
+        lora_scale=job_input.get("lora_scale", 0),
         pose_image=job_input.get("pose_image", None),
         seed=job_input['seed']
     )
