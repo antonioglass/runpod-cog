@@ -34,28 +34,6 @@ INPUT_SCHEMA = {
         'default': 512,
         'constraints': lambda height: height in [128, 256, 384, 448, 512, 576, 640, 704, 768]
     },
-    'init_image': {
-        'type': str,
-        'required': False,
-        'default': None
-    },
-    'mask': {
-        'type': str,
-        'required': False,
-        'default': None
-    },
-    'prompt_strength': {
-        'type': float,
-        'required': False,
-        'default': 0.8,
-        'constraints': lambda prompt_strength: 0 <= prompt_strength <= 1
-    },
-    'num_outputs': {
-        'type': int,
-        'required': False,
-        'default': 1,
-        'constraints': lambda num_outputs: 10 > num_outputs > 0
-    },
     'num_inference_steps': {
         'type': int,
         'required': False,
@@ -65,14 +43,14 @@ INPUT_SCHEMA = {
     'guidance_scale': {
         'type': float,
         'required': False,
-        'default': 7.5,
+        'default': 7,
         'constraints': lambda guidance_scale: 0 < guidance_scale < 20
     },
     'scheduler': {
         'type': str,
         'required': False,
-        'default': 'K-LMS',
-        'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S',  'EULER-A', 'EULER-D', 'HEUN', 'IPNDM', 'KDPM2-A', 'KDPM2-D', 'PNDM', 'K-LMS']
+        'default': 'DPM-M',
+        'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S', 'PNDM']
     },
     'seed': {
         'type': int,
@@ -84,21 +62,35 @@ INPUT_SCHEMA = {
         'required': False,
         'default': False
     },
-    'lora' : {
-        'type' : str,
-        'required' : False,
-        'default' : None
+    'duration': {
+        'type': int,
+        'required': False,
+        'default': 250
     },
-    'lora_scale' : {
-        'type' : float,
-        'required' : False,
-        'default' : 0,
-        'constraints': lambda lora_scale: 0 <= lora_scale <= 1
+    'video_length': {
+        'type': int,
+        'required': False,
+        'default': 8
     },
-    'pose_image' : {
-        'type' : str,
-        'required' : False,
-        'default' : None
+    'motion_field_strength_x': {
+        'type': float,
+        'required': False,
+        'default': 12
+    },
+    'motion_field_strength_y': {
+        'type': float,
+        'required': False,
+        'default': 12
+    },
+    't0': {
+        'type': int,
+        'required': False,
+        'default': 44
+    },
+    't1': {
+        'type': int,
+        'required': False,
+        'default': 47
     }
 }
 
@@ -117,11 +109,6 @@ def run(job):
         return {"error": validated_input['errors']}
     validated_input = validated_input['validated_input']
 
-    # Download input objects
-    job_input['init_image'], job_input['mask'] = rp_download.download_input_objects(
-        [job_input.get('init_image', None), job_input.get('mask', None)]
-    )  # pylint: disable=unbalanced-tuple-unpacking
-
     MODEL.NSFW = job_input.get('nsfw', True)
 
     if job_input['seed'] is None:
@@ -132,16 +119,15 @@ def run(job):
         negative_prompt=job_input.get("negative_prompt", None),
         width=job_input.get('width', 512),
         height=job_input.get('height', 512),
-        init_image=job_input['init_image'],
-        mask=job_input['mask'],
-        prompt_strength=job_input['prompt_strength'],
-        num_outputs=job_input.get('num_outputs', 1),
         num_inference_steps=job_input.get('num_inference_steps', 50),
         guidance_scale=job_input['guidance_scale'],
-        scheduler=job_input.get('scheduler', "K-LMS"),
-        lora=job_input.get("lora", None),
-        lora_scale=job_input.get("lora_scale", 0),
-        pose_image=job_input.get("pose_image", None),
+        scheduler=job_input.get('scheduler', "DPM-M"),
+        duration=job_input.get('duration', 250),
+        video_length=job_input.get('video_length', 8),
+        motion_field_strength_x=job_input.get('motion_field_strength_x', 12),
+        motion_field_strength_y=job_input.get('motion_field_strength_y', 12),
+        t0=job_input.get('t0', 44),
+        t1=job_input.get('t1', 47),
         seed=job_input['seed']
     )
 
