@@ -133,7 +133,7 @@ def run(job):
 
     job_output = []
     for index, img_path in enumerate(img_paths):
-        image_url = rp_upload.upload_image(job['id'], img_path, index)
+        image_url = rp_upload.upload_file_to_bucket(job['id'] + ".gif", img_path)
 
         job_output.append({
             "image": image_url,
