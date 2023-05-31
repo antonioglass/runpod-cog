@@ -38,7 +38,7 @@ from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
 from compel import Compel
 from diffusers.utils import load_image
 
-model_id = "./DreamShaper"
+model_id = "./dreamshaper"
 
 class Predictor(BasePredictor):
     '''Predictor class for StableDiffusion-v1'''
@@ -234,10 +234,14 @@ class Predictor(BasePredictor):
         pipe.scheduler = make_scheduler(scheduler, pipe.scheduler.config)
         
         # Negative embeddings
-        pipe.load_textual_inversion("./negative_embeds/BadDream.pt", token="BadDream")
-        pipe.load_textual_inversion("./negative_embeds/FastNegativeEmbedding.pt", token="FastNegativeEmbedding")
-        pipe.load_textual_inversion("./negative_embeds/UnrealisticDream.pt", token="UnrealisticDream")
-        pipe.load_textual_inversion("./negative_embeds/FastNegativeEmbeddingStrong.pt", token="FastNegativeEmbeddingStrong")
+        if "BadDream" not in self.txt2img_pipe.tokenizer.get_vocab():
+            pipe.load_textual_inversion("./negative_embeds/BadDream.pt", token="BadDream")
+        if "FastNegativeEmbedding" not in self.txt2img_pipe.tokenizer.get_vocab():
+            pipe.load_textual_inversion("./negative_embeds/FastNegativeEmbedding.pt", token="FastNegativeEmbedding")
+        if "UnrealisticDream" not in self.txt2img_pipe.tokenizer.get_vocab():
+            pipe.load_textual_inversion("./negative_embeds/UnrealisticDream.pt", token="UnrealisticDream")
+        if "FastNegativeEmbeddingStrong" not in self.txt2img_pipe.tokenizer.get_vocab():
+            pipe.load_textual_inversion("./negative_embeds/FastNegativeEmbeddingStrong.pt", token="FastNegativeEmbeddingStrong")
 
         prompt=[prompt] * num_outputs if prompt is not None else None
         prompt_embeds = self.compel(prompt)
