@@ -87,7 +87,7 @@ INPUT_SCHEMA = {
     'lora' : {
         'type' : str,
         'required' : False,
-        'default' : None
+        'default' : "anime/lora/POVMissionary.bin"
     },
     'lora_scale' : {
         'type' : float,
@@ -139,7 +139,7 @@ def run(job):
         num_inference_steps=job_input.get('num_inference_steps', 22),
         guidance_scale=job_input['guidance_scale'],
         scheduler=job_input.get('scheduler', "EULER-A"),
-        lora=job_input.get("lora", None),
+        lora=job_input.get("lora", "anime/lora/POVMissionary.bin"),
         lora_scale=job_input.get("lora_scale", 0),
         pose_image=job_input.get("pose_image", None),
         seed=job_input['seed']
