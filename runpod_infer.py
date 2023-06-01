@@ -31,25 +31,25 @@ INPUT_SCHEMA = {
     'height': {
         'type': int,
         'required': False,
-        'default': 512,
+        'default': 768,
         'constraints': lambda height: height in [128, 256, 384, 448, 512, 576, 640, 704, 768]
     },
-    'init_image': {
-        'type': str,
-        'required': False,
-        'default': None
-    },
-    'mask': {
-        'type': str,
-        'required': False,
-        'default': None
-    },
-    'prompt_strength': {
-        'type': float,
-        'required': False,
-        'default': 0.8,
-        'constraints': lambda prompt_strength: 0 <= prompt_strength <= 1
-    },
+    # 'init_image': {
+        # 'type': str,
+        # 'required': False,
+        # 'default': None
+    # },
+    # 'mask': {
+        # 'type': str,
+        # 'required': False,
+        # 'default': None
+    # },
+    # 'prompt_strength': {
+        # 'type': float,
+        # 'required': False,
+        # 'default': 0.8,
+        # 'constraints': lambda prompt_strength: 0 <= prompt_strength <= 1
+    # },
     'num_outputs': {
         'type': int,
         'required': False,
@@ -59,42 +59,42 @@ INPUT_SCHEMA = {
     'num_inference_steps': {
         'type': int,
         'required': False,
-        'default': 50,
+        'default': 22,
         'constraints': lambda num_inference_steps: 0 < num_inference_steps < 500
     },
     'guidance_scale': {
         'type': float,
         'required': False,
-        'default': 7.5,
+        'default': 7,
         'constraints': lambda guidance_scale: 0 < guidance_scale < 20
     },
     'scheduler': {
         'type': str,
         'required': False,
-        'default': 'K-LMS',
-        'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S',  'EULER-A', 'EULER-D', 'HEUN', 'IPNDM', 'KDPM2-A', 'KDPM2-D', 'PNDM', 'K-LMS']
+        'default': 'EULER-A'
+        # 'constraints': lambda scheduler: scheduler in ['DDIM', 'DDPM', 'DPM-M', 'DPM-S',  'EULER-A', 'EULER-D', 'HEUN', 'IPNDM', 'KDPM2-A', 'KDPM2-D', 'PNDM', 'K-LMS']
     },
     'seed': {
         'type': int,
         'required': False,
         'default': None
     },
-    'nsfw': {
-        'type': bool,
-        'required': False,
-        'default': False
-    },
-    'lora' : {
-        'type' : str,
-        'required' : False,
-        'default' : None
-    },
-    'lora_scale' : {
-        'type' : float,
-        'required' : False,
-        'default' : 0,
-        'constraints': lambda lora_scale: 0 <= lora_scale <= 1
-    },
+    # 'nsfw': {
+        # 'type': bool,
+        # 'required': False,
+        # 'default': False
+    # },
+    # 'lora' : {
+        # 'type' : str,
+        # 'required' : False,
+        # 'default' : None
+    # },
+    # 'lora_scale' : {
+        # 'type' : float,
+        # 'required' : False,
+        # 'default' : 0,
+        # 'constraints': lambda lora_scale: 0 <= lora_scale <= 1
+    # },
     'pose_image' : {
         'type' : str,
         'required' : False,
@@ -122,7 +122,7 @@ def run(job):
         [job_input.get('init_image', None), job_input.get('mask', None)]
     )  # pylint: disable=unbalanced-tuple-unpacking
 
-    MODEL.NSFW = job_input.get('nsfw', True)
+    # MODEL.NSFW = job_input.get('nsfw', True)
 
     if job_input['seed'] is None:
         job_input['seed'] = int.from_bytes(os.urandom(2), "big")
@@ -131,16 +131,16 @@ def run(job):
         prompt=job_input["prompt"],
         negative_prompt=job_input.get("negative_prompt", None),
         width=job_input.get('width', 512),
-        height=job_input.get('height', 512),
-        init_image=job_input['init_image'],
-        mask=job_input['mask'],
-        prompt_strength=job_input['prompt_strength'],
+        height=job_input.get('height', 768),
+        # init_image=job_input['init_image'],
+        # mask=job_input['mask'],
+        # prompt_strength=job_input['prompt_strength'],
         num_outputs=job_input.get('num_outputs', 1),
-        num_inference_steps=job_input.get('num_inference_steps', 50),
+        num_inference_steps=job_input.get('num_inference_steps', 22),
         guidance_scale=job_input['guidance_scale'],
-        scheduler=job_input.get('scheduler', "K-LMS"),
-        lora=job_input.get("lora", None),
-        lora_scale=job_input.get("lora_scale", 0),
+        scheduler=job_input.get('scheduler', "EULER-A"),
+        # lora=job_input.get("lora", None),
+        # lora_scale=job_input.get("lora_scale", 0),
         pose_image=job_input.get("pose_image", None),
         seed=job_input['seed']
     )
