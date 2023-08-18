@@ -34,8 +34,10 @@ from diffusers import (
 
 from PIL import Image
 from cog import BasePredictor, Input, Path
+# from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
 from compel import Compel
 from diffusers.utils import load_image
+import kohya_lora_loader
 
 model_id = "./dlbrt"
 
@@ -98,8 +100,14 @@ class Predictor(BasePredictor):
             # local_files_only=True,
             # controlnet=self.controlnet_depth,
         # ).to("cuda")
-        
+
+        # self.txt2img_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_pose_and_depth_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_pose_pipe.enable_xformers_memory_efficient_attention()
+        # self.txt2img_controlnet_depth_pipe.enable_xformers_memory_efficient_attention()
         self.compel = Compel(tokenizer=self.txt2img_pipe.tokenizer, text_encoder=self.txt2img_pipe.text_encoder)
+        # self.img2img_pipe.enable_xformers_memory_efficient_attention()
+        # self.inpaint_pipe.enable_xformers_memory_efficient_attention()
 
     @torch.inference_mode()
     @torch.cuda.amp.autocast()
@@ -155,14 +163,14 @@ class Predictor(BasePredictor):
         seed: int = Input(
             description="Random seed. Leave blank to randomize the seed", default=None
         ),
-        # lora: str = Input(
-            # description="instantly download lora models and use them via runpod",
-            # default="lora/POVMissionary.bin"
-        # ),
-        # lora_scale: float = Input(
-            # description="what percentage of the lora model do you want applied?",
-            # default=0
-        # ),
+        lora: str = Input(
+            description="instantly download lora models and use them via runpod",
+            default="asigi.bin"
+        ),
+        lora_scale: float = Input(
+            description="what percentage of the lora model do you want applied?",
+            default=0
+        ),
         pose_image: str = Input(
             description="Path to processed image for ControlNet.",
             default=None,
@@ -174,7 +182,7 @@ class Predictor(BasePredictor):
     ) -> List[Path]:
         '''
         Run a single prediction on the model
-        '''        
+        '''
         if seed is None:
             seed = int.from_bytes(os.urandom(2), "big")
         print(f"Using seed: {seed}")
@@ -225,7 +233,7 @@ class Predictor(BasePredictor):
             }
 
         pipe.scheduler = make_scheduler(scheduler, pipe.scheduler.config)
-        
+
         # Negative embeddings
         # if "BadDream" not in self.txt2img_pipe.tokenizer.get_vocab():
             # pipe.load_textual_inversion("./negative_embeds/BadDream.pt", token="BadDream")
@@ -236,19 +244,26 @@ class Predictor(BasePredictor):
         # if "FastNegativeEmbeddingStrong" not in self.txt2img_pipe.tokenizer.get_vocab():
             # pipe.load_textual_inversion("./negative_embeds/FastNegativeEmbeddingStrong.pt", token="FastNegativeEmbeddingStrong")
 
+        # pipe.load_lora_weights(".", weight_name="asigi.safetensors")
+        # pipe._lora_scale = 0
+
+        # Loading Kohya LoRa
+        kohya_lora_loader.install_lora_hook(pipe)
+
+        lora1 = pipe.apply_lora(lora, 1.0)
+        lora1.alpha = lora_scale
+
         prompt=[prompt] * num_outputs if prompt is not None else None
         prompt_embeds = self.compel(prompt)
         negative_prompt=[negative_prompt] * num_outputs if negative_prompt is not None else None
-        
+
         # Embedding conversion
         # negative_prompt = pipe.maybe_convert_prompt(negative_prompt, self.txt2img_pipe.tokenizer)
-        
+
         negative_prompt_embeds = self.compel(negative_prompt)
-        
+
         # not sure if it's needed. see more here: https://github.com/damian0815/compel#0110---add-support-for-prompts-longer-than-the-models-max-token-length
         [prompt_embeds, negative_prompt_embeds] = self.compel.pad_conditioning_tensors_to_same_length([prompt_embeds, negative_prompt_embeds])
-
-        # pipe.unet.load_attn_procs(lora)
 
         generator = torch.Generator("cuda").manual_seed(seed)
         output = pipe(
@@ -262,6 +277,8 @@ class Predictor(BasePredictor):
             # cross_attention_kwargs={"scale": lora_scale},
             **extra_kwargs,
         )
+
+        kohya_lora_loader.uninstall_lora_hook(pipe)
 
         output_paths = []
         for i, sample in enumerate(output.images):
